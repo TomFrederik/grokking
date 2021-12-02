@@ -37,13 +37,12 @@ def main(
     trainer = pl.Trainer(
         gpus=torch.cuda.device_count(),
         max_steps=steps,
-        checkpoint_callback=pl.callbacks.model_checkpoint.ModelCheckpoint(
+        callbacks=[pl.callbacks.model_checkpoint.ModelCheckpoint(
             save_top_k=1,
             verbose=True,
-            monitor="val_loss",
+            monitor="Validation/Loss",
             mode="min",
-            prefix="",
-        ),
+        )],
         logger=pl.loggers.WandbLogger(project="grokking-transformer", config={"lr": lr, "batch_size": batch_size, "steps": steps}),
         progress_bar_refresh_rate=1,
     )
