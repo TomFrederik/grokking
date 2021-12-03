@@ -9,7 +9,7 @@ import pytorch_lightning as pl
 import wandb
 
 from model import GrokkingTransformer
-from datasets import S5Data
+from datasets import get_dataset
 
 
 def main(
@@ -20,7 +20,9 @@ def main(
     num_heads,
     layers,
     width,
-    data_path,
+    data_name,
+    num_elements,
+    data_dir,
     force_data,
     batch_size,
     steps,
@@ -36,7 +38,7 @@ def main(
     pl.seed_everything(seed)
 
     # data
-    data = S5Data(data_path=data_path, force_data=force_data)
+    data = get_dataset(descr=data_name, num_elements=num_elements, data_dir=data_dir, force_data=force_data)
     idcs = np.random.permutation(np.arange(len(data)))
     train_idcs = idcs[:int(train_ratio * len(idcs))]
     val_idcs = idcs[int(train_ratio * len(idcs)):]
@@ -89,7 +91,9 @@ if __name__ == '__main__':
     parser.add_argument("--width", type=int, default=128)
 
     # data args
-    parser.add_argument("--data_path", type=str, default="./data/s5.npy")
+    parser.add_argument("--data_name", type=str, default="perm", choices=["perm", "plus", "minus"])
+    parser.add_argument("--num_elements", type=int, default=5) # choose 5 for permutation data, 97 for arithmetic data
+    parser.add_argument("--data_dir", type=str, default="./data")
     parser.add_argument("--force_data", action="store_true", help="Whether to force dataset creation.")
     
     # training args
