@@ -94,8 +94,8 @@ if __name__ == '__main__':
     parser.add_argument("--data_name", type=str, default="perm_xy", choices=[
         # Permutation
         "perm_xy", 
-        # perm_xyx1, #TODO
-        # perm_xyx, #TODO
+        "perm_xyx1",
+        "perm_xyx",
         
         # Arithmetic, all operations are mod p
         "plus", # x + y

@@ -1,10 +1,6 @@
 # Re-implementation of the paper 'Grokking: Generalization beyond overfitting on small algorithmic datasets'
 
 ## Datasets
-Currently, does *not* support:
-- $$x\circ y = x\cdot y \cdot x^-1$$, for $$x,y\in S_n$$  
-- $$x\circ y = x\cdot y \cdot x$$, for $$x,y\in S_n$$  
-  
 I'm not super clear on how they defined their division. I am using integer division:
 - $$x\circ y = (x // y) mod p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
 - $$x\circ y = (x // y) mod p$$ if y is odd else (x - y) mod p, for some prime $$p$$ and $$0\leq x,y \leq p$$

@@ -100,15 +100,37 @@ class PermData(torch.utils.data.Dataset):
         eq = group_size + 1
         
         all_permutations = list(permutations(range(group_size)))
-        for i,j in product(range(factorial(group_size)), repeat=2):
-            # compute result of combining i and j
-            i_, j_ = all_permutations[i], all_permutations[j]
-            combined = []
-            for k in range(len(i_)):
-                combined.append(j_.index(i_[k]))
-            combined = tuple(combined)
+        for i, j in product(range(factorial(group_size)), repeat=2):
+            
+            # compose permutations
+            perm1, perm2 = all_permutations[i], all_permutations[j]
+            combined = compose_perms(perm1, perm2)
+            if func_name == "perm_xyx":
+                combined = compose_perms(combined, perm1)
+            elif func_name == "perm_xyx1":
+                combined = compose_perms(combined, get_inverse_perm(perm1))
+            
+            # get resulting index and save data
             res = all_permutations.index(combined)
             data.append([i, op, j, eq, res])
         
         # save data
         np.save(os.path.join(data_dir, f'{func_name}_{group_size}.npy'), data)
+        
+
+def get_inverse_perm(perm):
+    """
+    Computes inverse of a given permutation.
+    """
+    perm = np.array(perm)
+    inv = np.empty_like(perm)
+    inv[perm] = np.arange(len(perm), dtype=perm.dtype)
+    return list(inv)
+
+def compose_perms(perm1, perm2):
+    """
+    Computes perm1(perm2)
+    """
+    perm1 = np.array(perm1)
+    perm2 = np.array(perm2)
+    return tuple(perm1[perm2])
