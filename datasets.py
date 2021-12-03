@@ -43,7 +43,11 @@ class ArithmeticData(torch.utils.data.Dataset):
             logging.info(f"Creating data and saving to {data_dir}")
             self.generate_data(data_dir, func_name, prime)
         logging.info(f"Loading data from {data_dir}")
-        self.data = np.load(os.path.join(data_dir, f'{func_name}_{prime}.npy'))
+        try:
+            self.data = np.load(os.path.join(data_dir, f'{func_name}_{prime}.npy'))
+        except FileNotFoundError:
+            path = os.path.join(data_dir, f'{func_name}_{prime}.npy')
+            raise FileNotFoundError(f"Could not find {path}. Run with force_data=True to generate data")
     
     def __getitem__(self, index):
         return np.array(self.data[index])
@@ -73,7 +77,11 @@ class PermData(torch.utils.data.Dataset):
             logging.info(f"Creating data and saving to {data_dir}")
             self.generate_data(data_dir, group_size, func_name)
         logging.info(f"Loading data from {data_dir}")
-        self.data = np.load(os.path.join(data_dir, f'{func_name}_{group_size}.npy'))
+        try:
+            self.data = np.load(os.path.join(data_dir, f'{func_name}_{group_size}.npy'))
+        except FileNotFoundError:
+            path = os.path.join(data_dir, f'{func_name}_{group_size}.npy')
+            raise FileNotFoundError(f"Could not find {path}. Run with force_data=True to generate data")
         
     def __getitem__(self, index):
         return np.array(self.data[index])
