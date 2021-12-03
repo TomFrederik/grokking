@@ -1,4 +1,5 @@
 from itertools import permutations, product
+import logging
 from math import factorial
 
 import numpy as np
@@ -6,10 +7,12 @@ import torch
 
 
 class S5Data(torch.utils.data.Dataset):
-    def __init__(self, data_path=None):
+    def __init__(self, data_path=None, force_data=False):
         assert data_path is not None, "data_path is None"
+        if force_data:
+            logging.info(f"Creating data and saving to {data_path}")
+        logging.info(f"Loading data from {data_path}")
         self.data = np.load(data_path)
-        print(self.data.shape)
         
     def __getitem__(self, index):
         return np.array(self.data[index])
@@ -33,9 +36,6 @@ class S5Data(torch.utils.data.Dataset):
             combined = tuple(combined)
             res = all_permutations.index(combined)
             data.append([i, op, j, eq, res])
+        
         # save data
         np.save(data_path, data)
-
-if __name__ == "__main__":
-    S5Data.generate_data('./data/s5.npy')
-    # dataset = S5Data('./data/s5.npy')

@@ -1,3 +1,4 @@
+import numpy as np
 import pytorch_lightning as pl
 import torch
 from x_transformers import TransformerWrapper, Decoder
@@ -5,7 +6,7 @@ from x_transformers import TransformerWrapper, Decoder
 class GrokkingTransformer(pl.LightningModule):
     def __init__(self, layers=2, width=128, heads=4, num_tokens=7, max_seq_len=5, optim_kwargs=None):
         super().__init__()
-        
+        self.save_hyperparameters()
         if optim_kwargs is None:
             self.optim_kwargs = {
                 'lr': 1e-3,
@@ -28,13 +29,11 @@ class GrokkingTransformer(pl.LightningModule):
         self.loss = torch.nn.CrossEntropyLoss()
     
     def forward(self, x):
-        mask = torch.ones_like(x).bool()
-        mask[:,-1] = False
-        return self.model(x, mask=mask)
+        return self.model(x)
     
     def training_step(self, batch, batch_idx):
         x = batch
-        y_hat = self(x)
+        y_hat = self(x[:,:-1])
         loss = self.loss(y_hat[:,-1], x[:,-1])
         acc = (torch.argmax(y_hat[:,-1], dim=1) == x[:,-1]).sum() / x.shape[0]
         self.log('Training/Accuracy', acc, on_step=True)
@@ -43,7 +42,7 @@ class GrokkingTransformer(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x = batch
-        y_hat = self(x)
+        y_hat = self(x[:,:-1])
         loss = self.loss(y_hat[:,-1], x[:,-1])
         acc = (torch.argmax(y_hat[:,-1], dim=1) == x[:,-1]).sum() / x.shape[0]
         self.log('Validation/Accuracy', acc, on_epoch=True)
@@ -52,7 +51,14 @@ class GrokkingTransformer(pl.LightningModule):
 
     def configure_optimizers(self):
         self.optimizer = torch.optim.AdamW(self.parameters(), **self.optim_kwargs)
-        # self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, lambda epoch: min(epoch/10, 1))
-        self.scheduler = None
-        return {'optimizer': self.optimizer, 'scheduler': self.scheduler}
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, lambda epoch: min(epoch/10, 1))
+        return {
+            'optimizer': self.optimizer, 
+            'lr_scheduler': {
+                'scheduler': self.scheduler,
+                'frequency': 1,
+                'interval': 'step'
+                }
+        }
+
         
