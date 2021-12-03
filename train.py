@@ -32,7 +32,8 @@ def main(
     verbose,
     log_freq,
     num_workers,
-    disable_logging
+    disable_logging,
+    checkpoints
 ):
     # set wandb logging mode
     if disable_logging:
@@ -66,7 +67,8 @@ def main(
         'layers':layers,
         'width':width,
         'num_tokens':factorial(num_elements),
-        'optim_kwargs':optim_kwargs
+        'optim_kwargs':optim_kwargs,
+        'checkpoints':checkpoints
     }
     model = GrokkingTransformer(**model_kwargs)
 
@@ -145,5 +147,6 @@ if __name__ == '__main__':
     parser.add_argument("--log_freq", type=int, default=10)
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--disable_logging", action="store_true")
+    parser.add_argument("--checkpoints", type=int, default=None, nargs="*", help="List of number of steps after which to save model.")
     
     main(**vars(parser.parse_args()))
