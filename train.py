@@ -61,6 +61,14 @@ def main(
     model = GrokkingTransformer(**model_kwargs)
 
     # training
+    config = dict(
+        **optim_kwargs, 
+        **model_kwargs, 
+        batch_size=batch_size, 
+        steps=steps, 
+        data_name=data_name, 
+        num_elements=num_elements
+    )
     trainer = pl.Trainer(
         gpus=torch.cuda.device_count(),
         max_steps=steps,
@@ -70,7 +78,7 @@ def main(
             monitor="Validation/Loss",
             mode="min",
         )],
-        logger=pl.loggers.WandbLogger(project="grokking-transformer", config={"lr": lr, "batch_size": batch_size, "steps": steps}),
+        logger=pl.loggers.WandbLogger(project="grokking-transformer", config=config),
         progress_bar_refresh_rate=1,
     )
 
