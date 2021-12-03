@@ -1,5 +1,8 @@
 # Re-implementation of the paper 'Grokking: Generalization beyond overfitting on small algorithmic datasets'
 
+## Paper
+Original paper can be found [here](https://mathai-iclr.github.io/papers/papers/MATHAI_29_paper.pdf)
+
 ## Datasets
 I'm not super clear on how they defined their division. I am using integer division:
 - $$x\circ y = (x // y) mod p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
