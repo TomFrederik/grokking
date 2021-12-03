@@ -38,7 +38,7 @@ class GrokkingTransformer(pl.LightningModule):
         acc = (torch.argmax(y_hat[:,-1], dim=1) == x[:,-1]).sum() / x.shape[0]
         self.log('Training/Accuracy', acc, on_step=True)
         self.log('Training/Loss', loss, on_step=True)
-        return {'loss': loss}
+        return loss
     
     def validation_step(self, batch, batch_idx):
         x = batch
@@ -47,7 +47,7 @@ class GrokkingTransformer(pl.LightningModule):
         acc = (torch.argmax(y_hat[:,-1], dim=1) == x[:,-1]).sum() / x.shape[0]
         self.log('Validation/Accuracy', acc, on_epoch=True)
         self.log('Validation/Loss', loss, on_epoch=True)
-        return {'val_loss': loss}
+        return loss
 
     def configure_optimizers(self):
         self.optimizer = torch.optim.AdamW(self.parameters(), **self.optim_kwargs)

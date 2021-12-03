@@ -1,6 +1,7 @@
 import argparse
 import logging
 from math import factorial
+import os
 
 import numpy as np
 import torch
@@ -30,8 +31,15 @@ def main(
     seed,
     verbose,
     log_freq,
-    num_workers
+    num_workers,
+    disable_logging
 ):
+    # set wandb logging mode
+    if disable_logging:
+        os.environ['WANDB_MODE'] = 'offline'
+    else:
+        os.environ['WANDB_MODE'] = 'online'
+    
     # set logging level
     if verbose:
         logging.basicConfig(level=logging.INFO)
@@ -71,18 +79,23 @@ def main(
         data_name=data_name, 
         num_elements=num_elements
     )
+    callbacks = []
+    callbacks.append(
+        pl.callbacks.model_checkpoint.ModelCheckpoint(
+            save_top_k=1,
+            verbose=verbose,
+            monitor="Validation/Loss",
+            mode="min"
+        )
+    )
+    callbacks.append(pl.callbacks.progress.TQDMProgressBar(refresh_rate=log_freq))
+    # callbacks.append(pl.callbacks.ModelSummary(max_depth=5))
     trainer = pl.Trainer(
         gpus=torch.cuda.device_count(),
         max_steps=steps,
         log_every_n_steps=log_freq,
-        callbacks=[pl.callbacks.model_checkpoint.ModelCheckpoint(
-            save_top_k=1,
-            verbose=verbose,
-            monitor="Validation/Loss",
-            mode="min",
-        )],
+        callbacks=callbacks,
         logger=pl.loggers.WandbLogger(project="grokking-transformer", config=config),
-        progress_bar_refresh_rate=1,
     )
 
     trainer.fit(model, train_loader, val_loader)
@@ -131,6 +144,6 @@ if __name__ == '__main__':
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--log_freq", type=int, default=10)
     parser.add_argument("--num_workers", type=int, default=4)
-
+    parser.add_argument("--disable_logging", action="store_true")
     
     main(**vars(parser.parse_args()))
