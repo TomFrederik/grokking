@@ -6,17 +6,27 @@ import os
 import numpy as np
 import torch
 
+def isPrime(n):
+    if n & 1 == 0:
+        return False
+    d = 3
+    while d * d <= n:
+        if n % d == 0:
+            return False
+        d = d + 2
+    return True
 
 def get_dataset(descr, num_elements, data_dir=None, force_data=False):
     return {
         'plus': XpYData(data_dir, force_data, num_elements),
-        'minus': XmYData(data_dir, force_data, num_elements),
+        'minus': XminYData(data_dir, force_data, num_elements),
         'perm': SNData(data_dir, force_data, num_elements)
     }[descr]
 
 class XpYData(torch.utils.data.Dataset):
     def __init__(self, data_dir=None, force_data=False, prime=97):
         assert data_dir is not None, "data_dir is None"
+        assert isPrime(prime), "prime is not prime"
         if force_data:
             logging.info(f"Creating data and saving to {data_dir}")
             self.generate_data(data_dir, prime)
@@ -46,6 +56,7 @@ class XpYData(torch.utils.data.Dataset):
 class XminYData(torch.utils.data.Dataset):
     def __init__(self, data_dir=None, force_data=False, prime=97):
         assert data_dir is not None, "data_dir is None"
+        assert isPrime(prime), "prime is not prime"
         if force_data:
             logging.info(f"Creating data and saving to {data_dir}")
             self.generate_data(data_dir, prime)
