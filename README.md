@@ -3,8 +3,8 @@
 ## Datasets
 Currently, we only support:
 - $$x\circ y = x\cdot y$$, for $$x,y\in S_n$$  
-- $$x\circ y = x + y \% p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
-- $$x\circ y = x - y$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
+- $$x\circ y = (x + y) mod p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
+- $$x\circ y = (x - y) mod p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
 
 ## Hyperparameters
 The default hyperparameters are from the paper, but can be adjusted via the command line when running `train.py`
