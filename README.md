@@ -10,6 +10,7 @@ The default hyperparameters are from the paper, but can be adjusted via the comm
 
 ## Running experiments
 To run with default settings, simply run `python train.py`.
+The first time you train on any dataset you have to specify `--force_data`.
 
 ### Arguments:
 ### optimizer args
