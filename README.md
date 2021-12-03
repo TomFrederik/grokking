@@ -29,9 +29,13 @@ The first time you train on any dataset you have to specify `--force_data`.
 
 ### data args
 - "--data_name", type=str, default="perm", choices=[
-  - "perm_xy", 
+  - "perm_xy", # permutation composition x * y
+  - "perm_xyx1", # permutation composition x * y * x^-1
+  - "perm_xyx", # permutation composition x * y * x
   - "plus", # x + y
   - "minus", # x - y
+  - "div", # x / y
+  - "div_odd", # x / y if y is odd else x - y
   - "x2y2", # x^2 + y^2
   - "x2xyy2", # x^2 + y^2 + xy
   - "x2xyy2x", # x^2 + y^2 + xy + x
