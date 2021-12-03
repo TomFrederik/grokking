@@ -100,8 +100,8 @@ if __name__ == '__main__':
         # Arithmetic, all operations are mod p
         "plus", # x + y
         "minus", # x - y
-        # div, #TODO # x / y
-        # div_odd, #TODO # x / y if y is odd else x - y
+        "div", # x / y
+        "div_odd", # x / y if y is odd else x - y
         "x2y2", # x^2 + y^2
         "x2xyy2", # x^2 + y^2 + xy
         "x2xyy2x", # x^2 + y^2 + xy + x

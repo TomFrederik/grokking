@@ -26,8 +26,8 @@ def get_arithmetic_func(func_name):
     return {
         'plus': lambda x,y,p: (x + y) % p,
         'minus': lambda x,y,p: (x - y) % p,
-        # div #TODO
-        # div_odd #TODO
+        'div': lambda x,y,p: (x // y) % p, # not clear this is how they meant it
+        'div_odd': lambda x,y,p: (x // y) % p if y % 2 == 1 else (x - y) % p,
         'x2y2': lambda x,y,p: (x ** 2 + y ** 2) % p,
         'x2xyy2': lambda x,y,p: (x ** 2 + x * y + y ** 2) % p,
         'x2xyy2x': lambda x,y,p: (x ** 2 + x * y + y ** 2 + x) % p,
@@ -62,7 +62,11 @@ class ArithmeticData(torch.utils.data.Dataset):
         eq = prime + 1
         
         all_permutations = list(permutations(range(prime)))
-        for x, y in product(range(prime), repeat=2):
+        if func_name == 'div': # avoid dividing by zero
+            y_range = range(1, prime)
+        else:
+            y_range = range(prime)
+        for x, y in product(range(prime), y_range):
             res = get_arithmetic_func(func_name)(x, y, prime)
             data.append([x, op, y, eq, res])
         
