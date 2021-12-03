@@ -17,21 +17,33 @@ def isPrime(n):
     return True
 
 def get_dataset(descr, num_elements, data_dir=None, force_data=False):
+    if not descr.startswith('perm'):
+        return ArithmeticData(data_dir, force_data, num_elements, descr)
+    else:
+        return PermData(data_dir, force_data, num_elements, descr)
+
+def get_arithmetic_func(func_name):
     return {
-        'plus': XpYData(data_dir, force_data, num_elements),
-        'minus': XminYData(data_dir, force_data, num_elements),
-        'perm': SNData(data_dir, force_data, num_elements)
-    }[descr]
+        'plus': lambda x,y,p: (x + y) % p,
+        'minus': lambda x,y,p: (x - y) % p,
+        # div #TODO
+        # div_odd #TODO
+        'x2y2': lambda x,y,p: (x ** 2 + y ** 2) % p,
+        'x2xyy2': lambda x,y,p: (x ** 2 + x * y + y ** 2) % p,
+        'x2xyy2x': lambda x,y,p: (x ** 2 + x * y + y ** 2 + x) % p,
+        'x3xy': lambda x,y,p: (x ** 3 + x * y) % p,
+        'x3xy2y': lambda x,y,p: (x ** 3 + x * y ** 2 + y) % p
+    }[func_name]
 
-class XpYData(torch.utils.data.Dataset):
-    def __init__(self, data_dir=None, force_data=False, prime=97):
+class ArithmeticData(torch.utils.data.Dataset):
+    def __init__(self, data_dir=None, force_data=False, prime=97, func_name="plus"):
         assert data_dir is not None, "data_dir is None"
         assert isPrime(prime), "prime is not prime"
         if force_data:
             logging.info(f"Creating data and saving to {data_dir}")
-            self.generate_data(data_dir, prime)
+            self.generate_data(data_dir, func_name, prime)
         logging.info(f"Loading data from {data_dir}")
-        self.data = np.load(os.path.join(data_dir, f'xpy{prime}.npy'))
+        self.data = np.load(os.path.join(data_dir, f'{func_name}_{prime}.npy'))
     
     def __getitem__(self, index):
         return np.array(self.data[index])
@@ -40,58 +52,28 @@ class XpYData(torch.utils.data.Dataset):
         return len(self.data)
     
     @staticmethod
-    def generate_data(data_dir, prime=97):
+    def generate_data(data_dir, func_name, prime=97):
         data = []
         op = prime
         eq = prime + 1
         
         all_permutations = list(permutations(range(prime)))
-        for i,j in product(range(prime), repeat=2):
-            res = (i + j) % prime
-            data.append([i, op, j, eq, res])
+        for x, y in product(range(prime), repeat=2):
+            res = get_arithmetic_func(func_name)(x, y, prime)
+            data.append([x, op, y, eq, res])
         
         # save data
-        np.save(os.path.join(data_dir, f'xpy{prime}.npy'), data)
-
-class XminYData(torch.utils.data.Dataset):
-    def __init__(self, data_dir=None, force_data=False, prime=97):
-        assert data_dir is not None, "data_dir is None"
-        assert isPrime(prime), "prime is not prime"
-        if force_data:
-            logging.info(f"Creating data and saving to {data_dir}")
-            self.generate_data(data_dir, prime)
-        logging.info(f"Loading data from {data_dir}")
-        self.data = np.load(os.path.join(data_dir, f'xminy{prime}.npy'))
-    
-    def __getitem__(self, index):
-        return np.array(self.data[index])
-
-    def __len__(self):
-        return len(self.data)
-    
-    @staticmethod
-    def generate_data(data_dir, prime=97):
-        data = []
-        op = prime
-        eq = prime + 1
-        
-        all_permutations = list(permutations(range(prime)))
-        for i,j in product(range(prime), repeat=2):
-            res = (i - j) % prime
-            data.append([i, op, j, eq, res])
-        
-        # save data
-        np.save(os.path.join(data_dir, f'xminy{prime}.npy'), data)
+        np.save(os.path.join(data_dir, f'{func_name}_{prime}.npy'), data)
 
 
-class SNData(torch.utils.data.Dataset):
-    def __init__(self, data_dir=None, force_data=False, group_size=5):
+class PermData(torch.utils.data.Dataset):
+    def __init__(self, data_dir=None, force_data=False, group_size=5, func_name="perm_xy"):
         assert data_dir is not None, "data_dir is None"
         if force_data:
             logging.info(f"Creating data and saving to {data_dir}")
-            self.generate_data(data_dir, group_size)
+            self.generate_data(data_dir, group_size, func_name)
         logging.info(f"Loading data from {data_dir}")
-        self.data = np.load(os.path.join(data_dir, f's{group_size}.npy'))
+        self.data = np.load(os.path.join(data_dir, f'{func_name}_{group_size}.npy'))
         
     def __getitem__(self, index):
         return np.array(self.data[index])
@@ -100,7 +82,7 @@ class SNData(torch.utils.data.Dataset):
         return len(self.data)
     
     @staticmethod
-    def generate_data(data_dir, group_size=5):
+    def generate_data(data_dir, group_size=5, func_name="perm_xy"):
         data = []
         op = group_size
         eq = group_size + 1
@@ -117,4 +99,4 @@ class SNData(torch.utils.data.Dataset):
             data.append([i, op, j, eq, res])
         
         # save data
-        np.save(os.path.join(data_dir, f's{group_size}.npy'), data)
+        np.save(os.path.join(data_dir, f'{func_name}_{group_size}.npy'), data)

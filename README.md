@@ -1,10 +1,11 @@
 # Re-implementation of the paper 'Grokking: Generalization beyond overfitting on small algorithmic datasets'
 
 ## Datasets
-Currently, we only support:
-- $$x\circ y = x\cdot y$$, for $$x,y\in S_n$$  
-- $$x\circ y = (x + y) mod p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
-- $$x\circ y = (x - y) mod p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
+Currently, we do *not* support:
+- $$x\circ y = x\cdot y \cdot x^-1$$, for $$x,y\in S_n$$  
+- $$x\circ y = x\cdot y \cdot x$$, for $$x,y\in S_n$$  
+- $$x\circ y = (x / y) mod p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
+- $$x\circ y = (x / y) mod p$$ if y is odd else (x - y) mod p, for some prime $$p$$ and $$0\leq x,y \leq p$$
 
 ## Hyperparameters
 The default hyperparameters are from the paper, but can be adjusted via the command line when running `train.py`
@@ -25,7 +26,16 @@ To run with default settings, simply run `python train.py`.
 - "--width", type=int, default=128
 
 ### data args
-- "--data_name", type=str, default="perm", choices=["perm", "plus", "minus"]
+- "--data_name", type=str, default="perm", choices=[
+  - "perm_xy", 
+  - "plus", # x + y
+  - "minus", # x - y
+  - "x2y2", # x^2 + y^2
+  - "x2xyy2", # x^2 + y^2 + xy
+  - "x2xyy2x", # x^2 + y^2 + xy + x
+  - "x3xy", # x^3 + y
+  - "x3xy2y" # x^3 + xy^2 + y
+]
 - "--num_elements", type=int, default=5  (choose 5 for permutation data, 97 for arithmetic data)
 - "--data_dir", type=str, default="./data"
 - "--force_data", action="store_true", help="Whether to force dataset creation."

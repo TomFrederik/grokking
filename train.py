@@ -91,7 +91,23 @@ if __name__ == '__main__':
     parser.add_argument("--width", type=int, default=128)
 
     # data args
-    parser.add_argument("--data_name", type=str, default="perm", choices=["perm", "plus", "minus"])
+    parser.add_argument("--data_name", type=str, default="perm_xy", choices=[
+        # Permutation
+        "perm_xy", 
+        # perm_xyx1, #TODO
+        # perm_xyx, #TODO
+        
+        # Arithmetic, all operations are mod p
+        "plus", # x + y
+        "minus", # x - y
+        # div, #TODO # x / y
+        # div_odd, #TODO # x / y if y is odd else x - y
+        "x2y2", # x^2 + y^2
+        "x2xyy2", # x^2 + y^2 + xy
+        "x2xyy2x", # x^2 + y^2 + xy + x
+        "x3xy", # x^3 + y
+        "x3xy2y" # x^3 + xy^2 + y
+    ])
     parser.add_argument("--num_elements", type=int, default=5) # choose 5 for permutation data, 97 for arithmetic data
     parser.add_argument("--data_dir", type=str, default="./data")
     parser.add_argument("--force_data", action="store_true", help="Whether to force dataset creation.")
