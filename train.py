@@ -17,7 +17,7 @@ def main(
     weight_decay,
     beta1,
     beta2,
-    num_heads,
+    heads,
     layers,
     width,
     data_name,
@@ -28,7 +28,9 @@ def main(
     steps,
     train_ratio,
     seed,
-    verbose
+    verbose,
+    log_freq,
+    num_workers
 ):
     # set logging level
     if verbose:
@@ -42,8 +44,8 @@ def main(
     idcs = np.random.permutation(np.arange(len(data)))
     train_idcs = idcs[:int(train_ratio * len(idcs))]
     val_idcs = idcs[int(train_ratio * len(idcs)):]
-    train_loader = DataLoader(Subset(data, train_idcs), batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
-    val_loader = DataLoader(Subset(data, val_idcs), batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(Subset(data, train_idcs), batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+    val_loader = DataLoader(Subset(data, val_idcs), batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
     # model
     optim_kwargs = {
@@ -52,10 +54,10 @@ def main(
         'betas': (beta1, beta2)
     }
     model_kwargs = {
-        'num_heads':num_heads,
+        'heads':heads,
         'layers':layers,
         'width':width,
-        'num_tokens':factorial(5),
+        'num_tokens':factorial(num_elements),
         'optim_kwargs':optim_kwargs
     }
     model = GrokkingTransformer(**model_kwargs)
@@ -72,6 +74,7 @@ def main(
     trainer = pl.Trainer(
         gpus=torch.cuda.device_count(),
         max_steps=steps,
+        log_every_n_steps=log_freq,
         callbacks=[pl.callbacks.model_checkpoint.ModelCheckpoint(
             save_top_k=1,
             verbose=verbose,
@@ -94,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument("--beta2", type=float, default=0.98)
 
     # model args
-    parser.add_argument("--num_heads", type=int, default=4)
+    parser.add_argument("--heads", type=int, default=4)
     parser.add_argument("--layers", type=int, default=2)
     parser.add_argument("--width", type=int, default=128)
 
@@ -126,6 +129,8 @@ if __name__ == '__main__':
     parser.add_argument("--train_ratio", type=float, default=0.5)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--log_freq", type=int, default=10)
+    parser.add_argument("--num_workers", type=int, default=4)
 
     
     main(**vars(parser.parse_args()))

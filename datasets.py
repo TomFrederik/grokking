@@ -6,7 +6,14 @@ import os
 import numpy as np
 import torch
 
+###
+# some utility functions
+###
+
 def isPrime(n):
+    """
+    Checks whether n is a prime number
+    """
     if n & 1 == 0:
         return False
     d = 3
@@ -15,6 +22,23 @@ def isPrime(n):
             return False
         d = d + 2
     return True
+
+def get_inverse_perm(perm):
+    """
+    Computes inverse of a given permutation.
+    """
+    perm = np.array(perm)
+    inv = np.empty_like(perm)
+    inv[perm] = np.arange(len(perm), dtype=perm.dtype)
+    return list(inv)
+
+def compose_perms(perm1, perm2):
+    """
+    Computes perm1(perm2)
+    """
+    perm1 = np.array(perm1)
+    perm2 = np.array(perm2)
+    return tuple(perm1[perm2])
 
 def get_dataset(descr, num_elements, data_dir=None, force_data=False):
     if not descr.startswith('perm'):
@@ -35,14 +59,21 @@ def get_arithmetic_func(func_name):
         'x3xy2y': lambda x,y,p: (x ** 3 + x * y ** 2 + y) % p
     }[func_name]
 
+
+###
+# Dataset classes
+###
+
 class ArithmeticData(torch.utils.data.Dataset):
     def __init__(self, data_dir=None, force_data=False, prime=97, func_name="plus"):
         assert data_dir is not None, "data_dir is None"
         assert isPrime(prime), "prime is not prime"
+
         if force_data:
             logging.info(f"Creating data and saving to {data_dir}")
             self.generate_data(data_dir, func_name, prime)
         logging.info(f"Loading data from {data_dir}")
+
         try:
             self.data = np.load(os.path.join(data_dir, f'{func_name}_{prime}.npy'))
         except FileNotFoundError:
@@ -58,16 +89,16 @@ class ArithmeticData(torch.utils.data.Dataset):
     @staticmethod
     def generate_data(data_dir, func_name, prime=97):
         data = []
+        func = get_arithmetic_func(func_name)
         op = prime
         eq = prime + 1
         
-        all_permutations = list(permutations(range(prime)))
         if func_name == 'div': # avoid dividing by zero
             y_range = range(1, prime)
         else:
             y_range = range(prime)
         for x, y in product(range(prime), y_range):
-            res = get_arithmetic_func(func_name)(x, y, prime)
+            res = func(x, y, prime)
             data.append([x, op, y, eq, res])
         
         # save data
@@ -77,10 +108,13 @@ class ArithmeticData(torch.utils.data.Dataset):
 class PermData(torch.utils.data.Dataset):
     def __init__(self, data_dir=None, force_data=False, group_size=5, func_name="perm_xy"):
         assert data_dir is not None, "data_dir is None"
+        assert group_size <= 10, "group_size should not be > 10, otherwise you will run out of RAM"
+
         if force_data:
             logging.info(f"Creating data and saving to {data_dir}")
             self.generate_data(data_dir, group_size, func_name)
         logging.info(f"Loading data from {data_dir}")
+
         try:
             self.data = np.load(os.path.join(data_dir, f'{func_name}_{group_size}.npy'))
         except FileNotFoundError:
@@ -118,19 +152,4 @@ class PermData(torch.utils.data.Dataset):
         np.save(os.path.join(data_dir, f'{func_name}_{group_size}.npy'), data)
         
 
-def get_inverse_perm(perm):
-    """
-    Computes inverse of a given permutation.
-    """
-    perm = np.array(perm)
-    inv = np.empty_like(perm)
-    inv[perm] = np.arange(len(perm), dtype=perm.dtype)
-    return list(inv)
 
-def compose_perms(perm1, perm2):
-    """
-    Computes perm1(perm2)
-    """
-    perm1 = np.array(perm1)
-    perm2 = np.array(perm2)
-    return tuple(perm1[perm2])

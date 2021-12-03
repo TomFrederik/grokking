@@ -52,3 +52,5 @@ The first time you train on any dataset you have to specify `--force_data`.
 - "--train_ratio", type=float, default=0.5
 - "--seed", type=int, default=42
 - "--verbose", action="store_true"
+- "--log_freq", type=int, default=10
+- "--num_workers", type=int, default=4

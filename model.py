@@ -51,7 +51,7 @@ class GrokkingTransformer(pl.LightningModule):
 
     def configure_optimizers(self):
         self.optimizer = torch.optim.AdamW(self.parameters(), **self.optim_kwargs)
-        self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, lambda epoch: min(epoch/10, 1))
+        self.scheduler = torch.optim.lr_scheduler.LambdaLR(self.optimizer, lambda step: min(step/10, 1))
         return {
             'optimizer': self.optimizer, 
             'lr_scheduler': {
