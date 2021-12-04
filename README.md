@@ -4,9 +4,7 @@
 Original paper can be found [here](https://mathai-iclr.github.io/papers/papers/MATHAI_29_paper.pdf)
 
 ## Datasets
-I'm not super clear on how they defined their division. I am using integer division:
-- $$x\circ y = (x // y) mod p$$, for some prime $$p$$ and $$0\leq x,y \leq p$$
-- $$x\circ y = (x // y) mod p$$ if y is odd else (x - y) mod p, for some prime $$p$$ and $$0\leq x,y \leq p$$
+All datasets from the original paper's appendix are supported.
 
 ## Hyperparameters
 The default hyperparameters are from the paper, but can be adjusted via the command line when running `train.py`
@@ -54,3 +52,5 @@ The first time you train on any dataset you have to specify `--force_data`.
 - "--verbose", action="store_true"
 - "--log_freq", type=int, default=10
 - "--num_workers", type=int, default=4
+- "--disable_logging", action="store_true", help="Whether to use wandb logging"
+- "--checkpoints", type=int, default=None, nargs="*", help="List of number of steps after which to save model."
