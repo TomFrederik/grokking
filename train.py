@@ -62,11 +62,12 @@ def main(
         'weight_decay':weight_decay,
         'betas': (beta1, beta2)
     }
+    num_tokens = factorial(num_elements) + 2 if data_name.startswith('perm') else num_elements + 2
     model_kwargs = {
         'heads':heads,
         'layers':layers,
         'width':width,
-        'num_tokens':factorial(num_elements),
+        'num_tokens':num_tokens,
         'optim_kwargs':optim_kwargs,
         'checkpoints':checkpoints
     }
