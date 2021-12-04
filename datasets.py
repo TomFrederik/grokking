@@ -130,11 +130,12 @@ class PermData(torch.utils.data.Dataset):
     @staticmethod
     def generate_data(data_dir, group_size=5, func_name="perm_xy"):
         data = []
-        op = group_size
-        eq = group_size + 1
+        num_tokens = factorial(group_size)
+        op = num_tokens
+        eq = num_tokens + 1
         
         all_permutations = list(permutations(range(group_size)))
-        for i, j in product(range(factorial(group_size)), repeat=2):
+        for i, j in product(range(num_tokens), repeat=2):
             
             # compose permutations
             perm1, perm2 = all_permutations[i], all_permutations[j]
