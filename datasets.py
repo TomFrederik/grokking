@@ -48,15 +48,15 @@ def get_dataset(descr, num_elements, data_dir=None, force_data=False):
 
 def get_arithmetic_func(func_name):
     return {
-        'plus': lambda x,y,p: (x + y) % p,
-        'minus': lambda x,y,p: (x - y) % p,
-        'div': lambda x,y,p: (x // y) % p, # not clear this is how they meant it
-        'div_odd': lambda x,y,p: (x // y) % p if y % 2 == 1 else (x - y) % p,
-        'x2y2': lambda x,y,p: (x ** 2 + y ** 2) % p,
-        'x2xyy2': lambda x,y,p: (x ** 2 + x * y + y ** 2) % p,
-        'x2xyy2x': lambda x,y,p: (x ** 2 + x * y + y ** 2 + x) % p,
-        'x3xy': lambda x,y,p: (x ** 3 + x * y) % p,
-        'x3xy2y': lambda x,y,p: (x ** 3 + x * y ** 2 + y) % p
+        'plus': lambda x,y,p: (x, y, (x + y) % p),
+        'minus': lambda x,y,p: (x, y, (x - y) % p),
+        'div': lambda x,y,p: ((x * y) % p, y, x),
+        'div_odd': lambda x,y,p: (x, y, (x // y) % p if y % 2 == 1 else (x - y) % p),
+        'x2y2': lambda x,y,p: (x, y, (x ** 2 + y ** 2) % p),
+        'x2xyy2': lambda x,y,p: (x, y, (x ** 2 + x * y + y ** 2) % p),
+        'x2xyy2x': lambda x,y,p: (x, y, (x ** 2 + x * y + y ** 2 + x) % p),
+        'x3xy': lambda x,y,p: (x, y, (x ** 3 + x * y) % p),
+        'x3xy2y': lambda x,y,p: (x, y, (x ** 3 + x * y ** 2 + y) % p)
     }[func_name]
 
 
@@ -98,7 +98,7 @@ class ArithmeticData(torch.utils.data.Dataset):
         else:
             y_range = range(prime)
         for x, y in product(range(prime), y_range):
-            res = func(x, y, prime)
+            x, y, res = func(x, y, prime)
             data.append([x, op, y, eq, res])
         
         # save data
